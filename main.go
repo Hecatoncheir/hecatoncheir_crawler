@@ -1,12 +1,14 @@
 package main
 
-import "hecatonhair/httpengine"
-import "hecatonhair/SocketEngine"
+import (
+	"hecatonhair/SocketEngine"
+	"hecatonhair/httpengine"
+)
 
 func main() {
-	httpServer := httpengine.NewHTTPEngine("v1.0")
-	httpServer.PowerUp("0.0.0.0", 8181)
-
 	socketEngine := SocketEngine.NewEngine("v1.0")
-	socketEngine.PowerUp("0.0.0.0", 8182)
+
+	httpEngine := httpengine.NewHTTPEngine("v1.0")
+	httpEngine.Router.HandlerFunc("GET", "/", socketEngine.Handler.ServeHTTP)
+	httpEngine.PowerUp("0.0.0.0", 8181)
 }
