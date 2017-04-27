@@ -4,12 +4,14 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
 	"encoding/json"
+
+	"github.com/julienschmidt/httprouter"
 )
 
 func NewHTTPEngine(apiVersion string) *HTTPEngine {
-	httpEngine := HTTPEngine{APIVersion: apiVersion}
+	router := httprouter.New()
+	httpEngine := HTTPEngine{APIVersion: apiVersion, Router: router}
 	return &httpEngine
 }
 
@@ -20,7 +22,6 @@ type HTTPEngine struct {
 }
 
 func (httpEngine *HTTPEngine) PowerUp(host string, port int) {
-	httpEngine.Router = httprouter.New()
 	httpEngine.Router.GET("/api/version", httpEngine.apiVersionCheckHandler)
 
 	httpEngine.Server = &http.Server{Addr: fmt.Sprintf("%v:%v", host, port)}
