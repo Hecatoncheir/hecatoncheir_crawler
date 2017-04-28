@@ -1,37 +1,40 @@
-package SocketEngine
+package socket_engine
 
 import (
-	"hecatonhair/SocketEngine"
 	"sync"
 	"testing"
 
 	"golang.org/x/net/websocket"
+	"fmt"
 )
 
 var once sync.Once
 
 func startUpSocketServer() {
-	engine := SocketEngine.NewEngine("v1.0")
-	engine.PowerUp("localhost", 8181)
+	fmt.Print("ADSAd")
+	engine := NewEngine("v1.0")
+	engine.Listen("localhost", 8181)
 	defer engine.Server.Close()
 }
 
 func TestSocketServerCanHandleEvents(test *testing.T) {
-	once.Do(startUpSocketServer)
+	go once.Do(startUpSocketServer)
+
+
 
 	socketConnection, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
 	if err != nil {
 		test.Error(err)
 	}
 
-	inputMessage := make(chan SocketEngine.MessageEvent)
+	inputMessage := make(chan MessageEvent)
 
 	go func() {
 		defer socketConnection.Close()
 		defer close(inputMessage)
 
 		for {
-			messageFromServer := SocketEngine.MessageEvent{}
+			messageFromServer := MessageEvent{}
 			err = websocket.JSON.Receive(socketConnection, &messageFromServer)
 
 			if err != nil {
@@ -43,7 +46,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 		}
 	}()
 
-	messageToServer := SocketEngine.MessageEvent{Message: "Need api version"}
+	messageToServer := MessageEvent{Message: "Need api version"}
 	err = websocket.JSON.Send(socketConnection, messageToServer)
 
 	if err != nil {
