@@ -5,13 +5,11 @@ import (
 	"testing"
 
 	"golang.org/x/net/websocket"
-	"fmt"
 )
 
 var once sync.Once
 
 func startUpSocketServer() {
-	fmt.Print("ADSAd")
 	engine := NewEngine("v1.0")
 	engine.Listen("localhost", 8181)
 	defer engine.Server.Close()
@@ -19,8 +17,6 @@ func startUpSocketServer() {
 
 func TestSocketServerCanHandleEvents(test *testing.T) {
 	go once.Do(startUpSocketServer)
-
-
 
 	socketConnection, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
 	if err != nil {
