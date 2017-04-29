@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"log"
-	"encoding/json"
 )
 
 // MessageEvent  is a struct of event for receive from socket server
@@ -20,10 +19,11 @@ func NewEngine(apiVersion string) *Engine {
 	var upgrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
+		CheckOrigin:     func(r *http.Request) bool { return true },
 	}
 
 	engine := Engine{
-		APIVersion: apiVersion, Server: &http.Server{}, headersUpgrader: upgrader}
+		APIVersion: apiVersion, Server: &http.Server{}, headersUpgrader: upgrader, Clients: make(map[string]*ConnectedClient)}
 
 	return &engine
 }
@@ -32,6 +32,7 @@ func NewEngine(apiVersion string) *Engine {
 type Engine struct {
 	APIVersion      string
 	Server          *http.Server
+	Clients         map[string]*ConnectedClient
 	headersUpgrader websocket.Upgrader
 }
 
@@ -52,15 +53,37 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 		return
 	}
 
-	for {
-		_, messageBytes, err := socketConnection.ReadMessage()
-		if err != nil {
-			return
+	client := NewConnectedClient(socketConnection)
+	engine.Clients[client.ID] = client
+
+	go engine.listenConnectedClient(client)
+}
+
+// listenConnectedClient need for receive and broadcast client messages
+func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
+
+	for event := range client.Channel {
+		switch event.Message {
+		case "Need api version":
+
+			message := MessageEvent{
+				Message: "Version of API",
+				Data:    map[string]interface{}{"API version": engine.APIVersion}}
+
+			engine.Clients[event.ClientID].write(message.Message, message.Data)
+
+		default:
+			engine.writeAll(event.Message, event.Data)
 		}
+	}
 
-		event := &MessageEvent{}
-		json.Unmarshal(messageBytes, event)
+	delete(engine.Clients, client.ID)
 
-		socketConnection.WriteJSON(event)
+}
+
+// writeAll send events to all connected clients
+func (engine *Engine) writeAll(message string, details map[string]interface{}) {
+	for _, connection := range engine.Clients {
+		go connection.write(message, details)
 	}
 }

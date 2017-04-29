@@ -5,7 +5,10 @@ import (
 	//"os"
 
 	"github.com/google/uuid"
-	"golang.org/x/net/websocket"
+	"github.com/gorilla/websocket"
+	"encoding/json"
+	"fmt"
+	"os"
 )
 
 // ConnectedClient of socket connection
@@ -21,27 +24,31 @@ func NewConnectedClient(clientConnection *websocket.Conn) *ConnectedClient {
 	clientID, _ := uuid.NewUUID()
 	client := ConnectedClient{ID: clientID.String(), ClientSocket: clientConnection, Channel: make(chan MessageEvent)}
 
-	//go func() {
-	//	for {
-	//		defer close(client.Channel)
-	//
-	//		inputMessage := Event{}
-	//		err := websocket.JSON.Receive(clientConnection, &inputMessage)
-	//
-	//		if err != nil {
-	//			fmt.Fprintf(os.Stdout, "Can't receive message from %s. %v", client.ID, err)
-	//			break
-	//		}
-	//
-	//		inputMessage.ClientID = client.ID
-	//		client.Channel <- inputMessage
-	//	}
-	//}()
+	go func() {
+		for {
+
+			inputMessage := MessageEvent{}
+			_, messageBytes, err := clientConnection.ReadMessage()
+
+			if err != nil {
+				fmt.Fprintf(os.Stdout, "Can't receive message from %s. %v \n", client.ID, err)
+				fmt.Fprintf(os.Stdout, "Closed connection of client %s \n", client.ID)
+				close(client.Channel)
+				break
+			}
+
+			json.Unmarshal(messageBytes, &inputMessage)
+
+			inputMessage.ClientID = client.ID
+			client.Channel <- inputMessage
+		}
+	}()
 
 	return &client
 }
 
+// write need for send event to client
 func (client *ConnectedClient) write(message string, data map[string]interface{}) {
-	event := MessageEvent{Message: message, Data: data}
-	websocket.JSON.Send(client.ClientSocket, event)
+	event := map[string]interface{}{"Message": message, "Data": data}
+	websocket.WriteJSON(client.ClientSocket, event)
 }
