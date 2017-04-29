@@ -5,6 +5,9 @@ import (
 	"net/http"
 	"github.com/gorilla/websocket"
 	"log"
+	"sync"
+	"encoding/json"
+	"hecatonhair/crawler"
 )
 
 // MessageEvent  is a struct of event for receive from socket server
@@ -33,6 +36,7 @@ type Engine struct {
 	APIVersion      string
 	Server          *http.Server
 	Clients         map[string]*ConnectedClient
+	clientsMu       sync.Mutex
 	headersUpgrader websocket.Upgrader
 }
 
@@ -54,7 +58,10 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 	}
 
 	client := NewConnectedClient(socketConnection)
+
+	engine.clientsMu.Lock()
 	engine.Clients[client.ID] = client
+	engine.clientsMu.Unlock()
 
 	go engine.listenConnectedClient(client)
 }
@@ -72,12 +79,29 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 			engine.Clients[event.ClientID].write(message.Message, message.Data)
 
+		case "Get items from categories of company":
+
+			var configuration = crawler.EntityConfig{}
+			bytes, _ := json.Marshal(event.Data)
+			json.Unmarshal(bytes, &configuration)
+
+			hecatonhair := crawler.NewCrawler()
+			go hecatonhair.RunWithConfiguration(configuration)
+
+			for item := range hecatonhair.Items {
+				data := map[string]interface{}{"Item": item}
+
+				engine.writeAll("Item from categories of company parsed", data)
+			}
+
 		default:
 			engine.writeAll(event.Message, event.Data)
 		}
 	}
 
+	engine.clientsMu.Lock()
 	delete(engine.Clients, client.ID)
+	engine.clientsMu.Unlock()
 
 }
 

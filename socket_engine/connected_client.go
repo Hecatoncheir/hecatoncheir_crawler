@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sync"
 )
 
 // ConnectedClient of socket connection
@@ -16,6 +17,7 @@ type ConnectedClient struct {
 	ID           string
 	Channel      chan MessageEvent
 	ClientSocket *websocket.Conn
+	wmu sync.Mutex
 }
 
 // NewConnectedClient for constructor for ConnectedClient
@@ -50,5 +52,7 @@ func NewConnectedClient(clientConnection *websocket.Conn) *ConnectedClient {
 // write need for send event to client
 func (client *ConnectedClient) write(message string, data map[string]interface{}) {
 	event := map[string]interface{}{"Message": message, "Data": data}
+	client.wmu.Lock()
 	websocket.WriteJSON(client.ClientSocket, event)
+	client.wmu.Unlock()
 }
