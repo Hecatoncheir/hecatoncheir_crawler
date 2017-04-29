@@ -51,7 +51,7 @@ func TestSocketServerCanHandleEvents(test *testing.T) {
 
 	for messageFromServer := range inputMessage {
 		if messageFromServer.Message != "Version of API" ||
-				messageFromServer.Data.(map[string]interface{})["API version"] != "v1.0" {
+			messageFromServer.Data.(map[string]interface{})["API version"] != "v1.0" {
 			test.Fail()
 		}
 		break

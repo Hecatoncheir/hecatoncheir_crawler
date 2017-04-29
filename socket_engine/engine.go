@@ -1,13 +1,13 @@
 package socket_engine
 
 import (
-	"fmt"
-	"net/http"
-	"github.com/gorilla/websocket"
-	"log"
-	"sync"
 	"encoding/json"
+	"fmt"
+	"github.com/gorilla/websocket"
 	"hecatonhair/crawler"
+	"log"
+	"net/http"
+	"sync"
 )
 
 // MessageEvent  is a struct of event for receive from socket server

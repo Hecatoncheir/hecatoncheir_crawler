@@ -1,11 +1,11 @@
 package main
 
 import (
-	socket "hecatonhair/socket_engine"
-	"hecatonhair/crawler"
 	"golang.org/x/net/websocket"
-	"testing"
+	"hecatonhair/crawler"
+	socket "hecatonhair/socket_engine"
 	"sync"
+	"testing"
 )
 
 var once sync.Once
@@ -42,7 +42,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 	}
 
 	smartphonesPage := crawler.Page{
-		Path:                     "smartfony-i-svyaz/smartfony-205",
+		Path: "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",
 		PageParamPath:            "/f/page=",
 		ItemConfig: crawler.ItemConfig{
@@ -79,7 +79,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 
 	for event := range message {
 		if event.Message != "Item from categories of company parsed" ||
-				event.Data.(map[string]interface{})["Item"] == nil {
+			event.Data.(map[string]interface{})["Item"] == nil {
 			test.Fail()
 		}
 		break

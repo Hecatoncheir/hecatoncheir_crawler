@@ -1,15 +1,13 @@
 package socket_engine
 
 import (
-	//"fmt"
-	//"os"
-
-	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
 	"encoding/json"
 	"fmt"
 	"os"
 	"sync"
+
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
 )
 
 // ConnectedClient of socket connection

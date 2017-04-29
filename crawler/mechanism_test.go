@@ -7,7 +7,7 @@ import (
 
 func TestCrawlerCanGetDocymentByConfig(test *testing.T) {
 	smartphonesPage := Page{
-		Path:                     "smartfony-i-svyaz/smartfony-205",
+		Path: "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",
 		PageParamPath:            "/f/page=",
 		ItemConfig: ItemConfig{
