@@ -21,7 +21,7 @@ func SetUpSocketServer() {
 // 	"Data": {
 // 			"Iri": "http://www.mvideo.ru/",
 //			"Name": "M.Video",
-//			"Categories": ["Телефоны"]
+//			"Categories": ["Телефоны"],
 // 			"Pages": [{
 // 				"Path": "smartfony-i-svyaz/smartfony-205",
 // 				"PageInPaginationSelector": ".pagination-list .pagination-item",
@@ -61,9 +61,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 		Pages: []crawler.Page{smartphonesPage},
 	}
 
-	data := map[string]interface{}{"Configuration": configuration}
-
-	websocket.JSON.Send(client, socket.MessageEvent{Message: "Get items from categories of company", Data: data})
+	websocket.JSON.Send(client, socket.MessageEvent{Message: "Get items from categories of company", Data: configuration})
 
 	message := make(chan socket.MessageEvent)
 
@@ -81,7 +79,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 
 	for event := range message {
 		if event.Message != "Item from categories of company parsed" ||
-				event.Data["Item"] == nil {
+				event.Data.(map[string]interface{})["Item"] == nil {
 			test.Fail()
 		}
 		break

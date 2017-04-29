@@ -13,7 +13,7 @@ import (
 // MessageEvent  is a struct of event for receive from socket server
 type MessageEvent struct {
 	Message  string
-	Data     map[string]interface{}
+	Data     interface{}
 	ClientID string
 }
 
@@ -26,7 +26,11 @@ func NewEngine(apiVersion string) *Engine {
 	}
 
 	engine := Engine{
-		APIVersion: apiVersion, Server: &http.Server{}, headersUpgrader: upgrader, Clients: make(map[string]*ConnectedClient)}
+		APIVersion:      apiVersion,
+		Server:          &http.Server{},
+		hecatonhair:     crawler.NewCrawler(),
+		headersUpgrader: upgrader,
+		Clients:         make(map[string]*ConnectedClient)}
 
 	return &engine
 }
@@ -38,6 +42,7 @@ type Engine struct {
 	Clients         map[string]*ConnectedClient
 	clientsMu       sync.Mutex
 	headersUpgrader websocket.Upgrader
+	hecatonhair     *crawler.Crawler
 }
 
 // PowerUp need for start listen port
@@ -68,10 +73,9 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 
 // listenConnectedClient need for receive and broadcast client messages
 func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
-	hecatonhair := crawler.NewCrawler()
 
 	go func() {
-		for item := range hecatonhair.Items {
+		for item := range engine.hecatonhair.Items {
 			data := map[string]interface{}{"Item": item}
 
 			engine.writeAll("Item from categories of company parsed", data)
@@ -94,7 +98,7 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 			bytes, _ := json.Marshal(event.Data)
 			json.Unmarshal(bytes, &configuration)
 
-			go hecatonhair.RunWithConfiguration(configuration)
+			go engine.hecatonhair.RunWithConfiguration(configuration)
 
 		default:
 			engine.writeAll(event.Message, event.Data)
@@ -108,8 +112,8 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 }
 
 // writeAll send events to all connected clients
-func (engine *Engine) writeAll(message string, details map[string]interface{}) {
+func (engine *Engine) writeAll(message string, data interface{}) {
 	for _, connection := range engine.Clients {
-		go connection.write(message, details)
+		go connection.write(message, data)
 	}
 }
