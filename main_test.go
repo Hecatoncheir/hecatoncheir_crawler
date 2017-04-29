@@ -80,7 +80,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 	}()
 
 	for event := range message {
-		if event.Message != "Item from categories of company must be updated" ||
+		if event.Message != "Item from categories of company parsed" ||
 				event.Data["Item"] == nil {
 			test.Fail()
 		}
