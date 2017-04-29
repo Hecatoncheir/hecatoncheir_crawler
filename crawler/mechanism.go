@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"fmt"
 )
 
 // Item is a structure of one product from one page
@@ -63,8 +62,6 @@ func (crawler *Crawler) RunWithConfiguration(config EntityConfig) error {
 	patternForCutPrice, _ := regexp.Compile("р[уб]*?.")
 
 	for _, pageConfig := range config.Pages {
-
-		fmt.Println(pageConfig)
 
 		document, err := goquery.NewDocument(config.Company.Iri + pageConfig.Path + pageConfig.PageParamPath + "1")
 		if err != nil {

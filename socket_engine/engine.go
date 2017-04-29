@@ -68,6 +68,15 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 
 // listenConnectedClient need for receive and broadcast client messages
 func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
+	hecatonhair := crawler.NewCrawler()
+
+	go func() {
+		for item := range hecatonhair.Items {
+			data := map[string]interface{}{"Item": item}
+
+			engine.writeAll("Item from categories of company parsed", data)
+		}
+	}()
 
 	for event := range client.Channel {
 		switch event.Message {
@@ -85,14 +94,7 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 			bytes, _ := json.Marshal(event.Data)
 			json.Unmarshal(bytes, &configuration)
 
-			hecatonhair := crawler.NewCrawler()
 			go hecatonhair.RunWithConfiguration(configuration)
-
-			for item := range hecatonhair.Items {
-				data := map[string]interface{}{"Item": item}
-
-				engine.writeAll("Item from categories of company parsed", data)
-			}
 
 		default:
 			engine.writeAll(event.Message, event.Data)
