@@ -2,7 +2,7 @@ package crawler
 
 import (
 	"regexp"
-	//"strconv"
+	"strconv"
 	"strings"
 	"time"
 
@@ -42,7 +42,7 @@ func (crawler *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig 
 		// price = strings.Replace(price, "р.", "", -1)
 		price = patternForCutPrice.ReplaceAllString(price, "")
 
-		 //fmt.Printf("Review %s: %s \n", name, price)
+		//fmt.Printf("Review %s: %s \n", name, price)
 
 		pageItem := Item{
 			Name:     name,
@@ -68,27 +68,36 @@ func (crawler *Crawler) RunWithConfiguration(config EntityConfig) error {
 			return err
 		}
 
-
-
 		go crawler.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
 
-		//pagesCount := document.Find(pageConfig.PageInPaginationSelector).Last().Find("a").Text()
+		pagesCount := document.Find(pageConfig.PageInPaginationSelector).Last().Find("a").Text()
 
-		//countOfPages, err := strconv.Atoi(pagesCount)
-		//if err != nil {
-		//	return err
-		//}
+		countOfPages, err := strconv.Atoi(pagesCount)
+		if err != nil {
+			return err
+		}
 
-		// var iterator int
-		// for iterator = 2; iterator <= countOfPages; iterator++ {
+		pagesCrawling := make(chan func(), 6)
 
-		// 	document, err := goquery.NewDocument(config.Company.Iri + pageConfig.Path + pageConfig.PageParamPath + strconv.Itoa(iterator))
-		// 	if err != nil {
-		// 		return err
-		// 	}
+		go func() {
+			for crawler := range pagesCrawling {
+				go crawler()
+			}
+		}()
 
-		// 	go crawler.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
-		// }
+		var iterator int
+		for iterator = 2; iterator <= countOfPages; iterator++ {
+			document, err := goquery.NewDocument(config.Company.Iri + pageConfig.Path + pageConfig.PageParamPath + strconv.Itoa(iterator))
+			if err != nil {
+				return err
+			}
+
+			pagesCrawling <- func() {
+				crawler.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
+			}
+		}
+
+		close(pagesCrawling)
 	}
 
 	return nil
