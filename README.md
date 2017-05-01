@@ -38,7 +38,7 @@ Response json:
 			"Price": "12990",
 			"Company": {
 				"ID": "",
-				"Iri": "http://www.mvideo.ru/",
+				"Iri": "http://link of company",
 				"Name": "Company name",
 				"Categories": ["Categories ids or names"]
 			},
