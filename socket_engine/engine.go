@@ -3,11 +3,12 @@ package socket_engine
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"hecatonhair/crawler"
 	"log"
 	"net/http"
 	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 // MessageEvent  is a struct of event for receive from socket server
@@ -78,7 +79,7 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 		for item := range engine.hecatonhair.Items {
 			data := map[string]interface{}{"Item": item}
 
-			engine.writeAll("Item from categories of company parsed", data)
+			engine.WriteAll("Item from categories of company parsed", data)
 		}
 	}()
 
@@ -90,7 +91,7 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 				Message: "Version of API",
 				Data:    map[string]interface{}{"API version": engine.APIVersion}}
 
-			engine.Clients[event.ClientID].write(message.Message, message.Data)
+			engine.Clients[event.ClientID].Write(message.Message, message.Data)
 
 		case "Get items from categories of company":
 
@@ -101,7 +102,7 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 			go engine.hecatonhair.RunWithConfiguration(configuration)
 
 		default:
-			engine.writeAll(event.Message, event.Data)
+			engine.WriteAll(event.Message, event.Data)
 		}
 	}
 
@@ -111,9 +112,9 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 }
 
-// writeAll send events to all connected clients
-func (engine *Engine) writeAll(message string, data interface{}) {
+// WriteAll send events to all connected clients
+func (engine *Engine) WriteAll(message string, data interface{}) {
 	for _, connection := range engine.Clients {
-		go connection.write(message, data)
+		go connection.Write(message, data)
 	}
 }

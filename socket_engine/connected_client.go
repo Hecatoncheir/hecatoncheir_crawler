@@ -47,8 +47,8 @@ func NewConnectedClient(clientConnection *websocket.Conn) *ConnectedClient {
 	return &client
 }
 
-// write need for send event to client
-func (client *ConnectedClient) write(message string, data interface{}) {
+// Write need for send event to client
+func (client *ConnectedClient) Write(message string, data interface{}) {
 	event := map[string]interface{}{"Message": message, "Data": data}
 	client.wmu.Lock()
 	websocket.WriteJSON(client.ClientSocket, event)
