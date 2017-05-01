@@ -7,16 +7,22 @@ import (
 	"golang.org/x/net/websocket"
 )
 
-var once sync.Once
+var (
+	once       sync.Once
+	goroutines sync.WaitGroup
+)
 
-func startUpSocketServer() {
+func SetUpSocketServer() {
 	engine := NewEngine("v1.0")
+	goroutines.Done()
 	engine.Listen("localhost", 8181)
 	defer engine.Server.Close()
 }
 
 func TestSocketServerCanHandleEvents(test *testing.T) {
-	go once.Do(startUpSocketServer)
+	goroutines.Add(1)
+	go once.Do(SetUpSocketServer)
+	goroutines.Wait()
 
 	socketConnection, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
 	if err != nil {

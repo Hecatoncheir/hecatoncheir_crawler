@@ -1,17 +1,22 @@
 package main
 
 import (
-	"golang.org/x/net/websocket"
 	"hecatonhair/crawler"
 	socket "hecatonhair/socket_engine"
 	"sync"
 	"testing"
+
+	"golang.org/x/net/websocket"
 )
 
-var once sync.Once
+var (
+	once       sync.Once
+	goroutines sync.WaitGroup
+)
 
 func SetUpSocketServer() {
 	server := socket.NewEngine("v1.0")
+	goroutines.Done()
 	server.Listen("localhost", 8181)
 	defer server.Server.Close()
 }
@@ -33,7 +38,9 @@ func SetUpSocketServer() {
 // 	}
 // }
 func TestSocketCanParseDocumentOfEntity(test *testing.T) {
+	goroutines.Add(1)
 	go once.Do(SetUpSocketServer)
+	goroutines.Wait()
 
 	client, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
 

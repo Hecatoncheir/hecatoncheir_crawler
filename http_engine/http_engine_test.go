@@ -10,16 +10,23 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var once sync.Once
+var (
+	once       sync.Once
+	goroutines sync.WaitGroup
+)
 
-func setUpHTTPServer() {
+func SetUpSocketServer() {
 	httpServer := NewHTTPEngine("v1.0")
+	goroutines.Done()
 	httpServer.PowerUp("localhost", 8181)
 }
 
 func TestHttpEngineCanSendVersionOfAPI(test *testing.T) {
 	var err error
-	go once.Do(setUpHTTPServer)
+
+	goroutines.Add(1)
+	go once.Do(SetUpSocketServer)
+	goroutines.Wait()
 
 	respose, err := http.Get("http://localhost:8181/api/version")
 	if err != nil {
