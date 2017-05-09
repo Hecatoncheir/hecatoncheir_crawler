@@ -3,6 +3,11 @@ Crawler with websocket and rest api
 
 By default tcp server run on `8181` port.
 
+<br>
+
+> #### TODO:
+> [0] Log <br>
+> [0] REST POST method
 
 ## REST API:
 
