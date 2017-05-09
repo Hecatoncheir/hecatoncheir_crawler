@@ -1,8 +1,8 @@
 package main
 
 import (
-	engine "hecatonhair/http_engine"
-	socket "hecatonhair/socket_engine"
+	engine "hecatoncheir/http_engine"
+	socket "hecatoncheir/socket_engine"
 )
 
 func main() {

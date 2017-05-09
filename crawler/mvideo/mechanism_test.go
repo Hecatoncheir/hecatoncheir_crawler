@@ -1,6 +1,7 @@
 package mvideo
 
 import (
+	"hecatoncheir/crawler"
 	"testing"
 	"time"
 )
@@ -18,7 +19,7 @@ func TestCrawlerCanGetDocymentByConfig(test *testing.T) {
 	}
 
 	configuration := EntityConfig{
-		Company: Company{
+		Company: crawler.Company{
 			Iri:        "http://www.mvideo.ru/",
 			Name:       "M.Video",
 			Categories: []string{"Телефоны"},

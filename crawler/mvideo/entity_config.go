@@ -1,5 +1,7 @@
 package mvideo
 
+import "hecatoncheir/crawler"
+
 type ItemConfig struct {
 	ItemSelector        string
 	NameOfItemSelector  string
@@ -15,14 +17,7 @@ type Page struct {
 	PageParamPath            string
 }
 
-type Company struct {
-	ID         string
-	Iri        string
-	Name       string
-	Categories []string
-}
-
 type EntityConfig struct {
-	Company
+	crawler.Company
 	Pages []Page
 }

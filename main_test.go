@@ -1,8 +1,9 @@
 package main
 
 import (
-	"hecatonhair/crawler/mvideo"
-	socket "hecatonhair/socket_engine"
+	"hecatoncheir/crawler"
+	"hecatoncheir/crawler/mvideo"
+	socket "hecatoncheir/socket_engine"
 	"sync"
 	"testing"
 
@@ -64,7 +65,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 	}
 
 	configuration := mvideo.EntityConfig{
-		Company: mvideo.Company{
+		Company: crawler.Company{
 			Iri:        "http://www.mvideo.ru/",
 			Name:       "M.Video",
 			Categories: []string{"Телефоны"},

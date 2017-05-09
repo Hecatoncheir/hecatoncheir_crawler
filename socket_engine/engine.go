@@ -3,7 +3,8 @@ package socket_engine
 import (
 	"encoding/json"
 	"fmt"
-	"hecatonhair/crawler/mvideo"
+	"hecatoncheir/crawler"
+	"hecatoncheir/crawler/mvideo"
 	"log"
 	"net/http"
 	"sync"
@@ -85,7 +86,7 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 		case "Get items from categories of company":
 
-			var company = mvideo.Company{}
+			var company = crawler.Company{}
 			dataBytes, _ := json.Marshal(event.Data)
 			json.Unmarshal(dataBytes, &company)
 

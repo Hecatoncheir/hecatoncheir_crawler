@@ -1,67 +1,35 @@
 package mvideo
 
 import (
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
-	"errors"
+	"hecatoncheir/crawler"
+
 	"github.com/PuerkitoBio/goquery"
-	"log"
 )
 
-type Cities map[string]string
-
-func (cities *Cities) searchCodeByCity(cityName string) (string, error) {
-	for city, code := range *cities {
-		if city == cityName {
-			return code, nil
-		}
-	}
-	return "", errors.New("City not exist")
-}
-
-func (cities *Cities) searchCityByCode(codeName string) (string, error) {
-	for city, code := range *cities {
-		if code == codeName {
-			return city, nil
-		}
-	}
-	return "", errors.New("Code not exist")
-}
-
-var cities = Cities{
+var cities = crawler.Cities{
 	"Москва":      "CityCZ_975",
 	"Новосибирск": "CityCZ_2246",
 }
 
-type Price struct {
-	Value    string
-	City     string
-	DateTime time.Time
-}
-
-// Item is a structure of one product from one page
-type Item struct {
-	Name    string
-	Price   Price
-	Company Company
-}
-
 // Crawler for parse documents
 type Crawler struct {
-	Items chan Item // For subscribe to events
+	Items chan crawler.Item // For subscribe to events
 }
 
 // NewCrawler create a new Crawler object
 func NewCrawler() *Crawler {
-	crawler := Crawler{Items: make(chan Item)}
+	crawler := Crawler{Items: make(chan crawler.Item)}
 	return &crawler
 }
 
 // GetItemsFromPage can get product from html document by selectors in the configuration
-func (crawler *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page, company Company, patternForCutPrice *regexp.Regexp) error {
+func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page, company crawler.Company, patternForCutPrice *regexp.Regexp) error {
 	document.Find(pageConfig.ItemSelector).Each(func(iterator int, item *goquery.Selection) {
 		var name, price string
 
@@ -76,31 +44,31 @@ func (crawler *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig 
 
 		//fmt.Printf("Review %s: %s \n", name, price)
 
-		cityName, err := cities.searchCityByCode(pageConfig.CityParam)
+		cityName, err := cities.SearchCityByCode(pageConfig.CityParam)
 		if err != nil {
 			log.Println(err)
 		}
 
-		priceData := Price{
+		priceData := crawler.Price{
 			Value:    price,
 			City:     cityName,
 			DateTime: time.Now().UTC(),
 		}
 
-		pageItem := Item{
+		pageItem := crawler.Item{
 			Name:    name,
 			Price:   priceData,
 			Company: company,
 		}
 
-		crawler.Items <- pageItem
+		cw.Items <- pageItem
 	})
 
 	return nil
 }
 
 // RunWithConfiguration can parse web documents and make Item structure for each product on page filtered by selectors
-func (crawler *Crawler) RunWithConfiguration(config EntityConfig) error {
+func (cw *Crawler) RunWithConfiguration(config EntityConfig) error {
 	patternForCutPrice, _ := regexp.Compile("р[уб]*?.")
 
 	for _, pageConfig := range config.Pages {
@@ -110,7 +78,7 @@ func (crawler *Crawler) RunWithConfiguration(config EntityConfig) error {
 			return err
 		}
 
-		go crawler.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
+		go cw.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
 
 		pagesCount := document.Find(pageConfig.PageInPaginationSelector).Last().Find("a").Text()
 
@@ -135,7 +103,7 @@ func (crawler *Crawler) RunWithConfiguration(config EntityConfig) error {
 			}
 
 			pagesCrawling <- func() {
-				crawler.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
+				cw.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
 			}
 		}
 
