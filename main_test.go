@@ -54,7 +54,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 		Path: "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",
 		PageParamPath:            "/f/page=",
-		CityParamPath:            "",
+		CityParamPath:            "?cityId=",
 		CityParam:                "CityCZ_975",
 		ItemConfig: mvideo.ItemConfig{
 			ItemSelector:        ".grid-view .product-tile",
