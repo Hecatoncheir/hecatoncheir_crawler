@@ -1,4 +1,4 @@
-package crawler
+package mvideo
 
 import (
 	"testing"
@@ -38,7 +38,7 @@ func TestCrawlerCanGetDocymentByConfig(test *testing.T) {
 	}()
 
 	for item := range mechanism.Items {
-		if item.Name != "" && item.Price != "" {
+		if item.Name != "" && item.Price.Value != "" {
 			isRightItems = true
 			break
 		}

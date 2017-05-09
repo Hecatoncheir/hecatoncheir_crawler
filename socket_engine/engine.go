@@ -3,7 +3,7 @@ package socket_engine
 import (
 	"encoding/json"
 	"fmt"
-	"hecatonhair/crawler"
+	"hecatonhair/crawler/mvideo"
 	"log"
 	"net/http"
 	"sync"
@@ -29,7 +29,6 @@ func NewEngine(apiVersion string) *Engine {
 	engine := Engine{
 		APIVersion:      apiVersion,
 		Server:          &http.Server{},
-		hecatonhair:     crawler.NewCrawler(),
 		headersUpgrader: upgrader,
 		Clients:         make(map[string]*ConnectedClient)}
 
@@ -43,7 +42,6 @@ type Engine struct {
 	Clients         map[string]*ConnectedClient
 	clientsMu       sync.Mutex
 	headersUpgrader websocket.Upgrader
-	hecatonhair     *crawler.Crawler
 }
 
 // PowerUp need for start listen port
@@ -75,14 +73,6 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 // listenConnectedClient need for receive and broadcast client messages
 func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
-	go func() {
-		for item := range engine.hecatonhair.Items {
-			data := map[string]interface{}{"Item": item}
-
-			engine.WriteAll("Item from categories of company parsed", data)
-		}
-	}()
-
 	for event := range client.Channel {
 		switch event.Message {
 		case "Need api version":
@@ -95,11 +85,26 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 		case "Get items from categories of company":
 
-			var configuration = crawler.EntityConfig{}
-			bytes, _ := json.Marshal(event.Data)
-			json.Unmarshal(bytes, &configuration)
+			var company = mvideo.Company{}
+			dataBytes, _ := json.Marshal(event.Data)
+			json.Unmarshal(dataBytes, &company)
 
-			go engine.hecatonhair.RunWithConfiguration(configuration)
+			if company.Iri == "http://www.mvideo.ru/" {
+				hecatonhair := mvideo.NewCrawler()
+
+				go func() {
+					for item := range hecatonhair.Items {
+						data := map[string]interface{}{"Item": item}
+
+						engine.WriteAll("Item from categories of company parsed", data)
+					}
+				}()
+
+				var configuration = mvideo.EntityConfig{}
+				json.Unmarshal(dataBytes, &configuration)
+
+				go hecatonhair.RunWithConfiguration(configuration)
+			}
 
 		default:
 			engine.WriteAll(event.Message, event.Data)

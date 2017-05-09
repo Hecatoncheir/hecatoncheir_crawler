@@ -1,7 +1,7 @@
 package main
 
 import (
-	"hecatonhair/crawler"
+	"hecatonhair/crawler/mvideo"
 	socket "hecatonhair/socket_engine"
 	"sync"
 	"testing"
@@ -31,6 +31,8 @@ func SetUpSocketServer() {
 // 				"Path": "smartfony-i-svyaz/smartfony-205",
 // 				"PageInPaginationSelector": ".pagination-list .pagination-item",
 // 				"PageParamPath": "/f/page=",
+// 				"CityParamPath": "?cityId=",
+// 				"CityParam": "CityCZ_975",
 // 				"ItemSelector": ".grid-view .product-tile",
 // 				"NameOfItemSelector": ".product-tile-title",
 // 				"PriceOfItemSelector": ".product-price-current"
@@ -48,24 +50,26 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 		test.Fatal()
 	}
 
-	smartphonesPage := crawler.Page{
+	smartphonesPage := mvideo.Page{
 		Path: "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",
 		PageParamPath:            "/f/page=",
-		ItemConfig: crawler.ItemConfig{
+		CityParamPath:            "",
+		CityParam:                "CityCZ_975",
+		ItemConfig: mvideo.ItemConfig{
 			ItemSelector:        ".grid-view .product-tile",
 			NameOfItemSelector:  ".product-tile-title",
 			PriceOfItemSelector: ".product-price-current",
 		},
 	}
 
-	configuration := crawler.EntityConfig{
-		Company: crawler.Company{
+	configuration := mvideo.EntityConfig{
+		Company: mvideo.Company{
 			Iri:        "http://www.mvideo.ru/",
 			Name:       "M.Video",
 			Categories: []string{"Телефоны"},
 		},
-		Pages: []crawler.Page{smartphonesPage},
+		Pages: []mvideo.Page{smartphonesPage},
 	}
 
 	websocket.JSON.Send(client, socket.MessageEvent{Message: "Get items from categories of company", Data: configuration})

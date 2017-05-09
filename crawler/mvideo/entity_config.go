@@ -1,11 +1,4 @@
-package crawler
-
-// type SearchConfig struct {
-// 	ItemConfig
-// 	Iri    string
-// 	Prefix string
-// 	Suffix string
-// }
+package mvideo
 
 type ItemConfig struct {
 	ItemSelector        string
@@ -15,6 +8,8 @@ type ItemConfig struct {
 
 type Page struct {
 	ItemConfig
+	CityParamPath            string
+	CityParam                string
 	Path                     string
 	PageInPaginationSelector string
 	PageParamPath            string
