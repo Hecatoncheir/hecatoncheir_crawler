@@ -1,4 +1,4 @@
-# Hecatonhair
+# Hecatoncheir
 Crawler with websocket and rest api
 
 By default tcp server run on `8181` port.
@@ -41,8 +41,8 @@ Send message:
  				"Path": "path to search page",
  				"PageInPaginationSelector": ".pagination-list .pagination-item",
  				"PageParamPath": "/f/page=",
-                "CityParamPath": "?cityId=",
-                "CityParam": "CityCZ_975",
+ 				"CityParamPath": "?cityId=",
+ 				"CityParam": "CityCZ_975",
  				"ItemSelector": ".grid-view .product-tile",
  				"NameOfItemSelector": ".product-tile-title",
  				"PriceOfItemSelector": ".product-price-current"
@@ -58,9 +58,9 @@ Response for all connected clients:
 		"Item": {
 			"Name": "Смартфон Samsung Galaxy J5 Prime Black",
 			"Price": {
-                "Value": "12990",
-                "DateTime": "2017-05-01T16:27:18.543653798Z",
-                "City": "Москва"
+ 				"Value": "12990",
+ 				"DateTime": "2017-05-01T16:27:18.543653798Z",
+ 				"City": "Москва"
 			},
 			"Company": {
 				"ID": "",
