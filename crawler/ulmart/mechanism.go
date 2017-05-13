@@ -38,9 +38,9 @@ func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page,
 		price = item.Find(pageConfig.PriceOfItemSelector).Text()
 
 		name = strings.TrimSpace(name)
-		price = strings.TrimSpace(price)
 
-		//fmt.Printf("Review %s: %s \n", name, price)
+		price = strings.Replace(price, " ", "", -1)
+		price = strings.TrimSpace(price)
 
 		cityName, err := cities.SearchCityByCode(pageConfig.CityID)
 		if err != nil {
