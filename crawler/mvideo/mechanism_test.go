@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestCrawlerCanGetDocymentByConfig(test *testing.T) {
+func TestCrawlerCanGetDocumentByConfig(test *testing.T) {
 	smartphonesPage := Page{
 		Path: "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",

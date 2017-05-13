@@ -1,8 +1,7 @@
-package mvideo
+package ulmart
 
 import (
 	"log"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -13,12 +12,11 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"net/url"
-	"fmt"
 )
 
 var cities = crawler.Cities{
-	"Москва":      "CityCZ_975",
-	"Новосибирск": "CityCZ_2246",
+	"Москва":  "18414",
+	"Алексин": "1688",
 }
 
 // Crawler for parse documents
@@ -28,12 +26,12 @@ type Crawler struct {
 
 // NewCrawler create a new Crawler object
 func NewCrawler() *Crawler {
-	crawler := Crawler{Items: make(chan crawler.Item)}
-	return &crawler
+	newCrawler := Crawler{Items: make(chan crawler.Item)}
+	return &newCrawler
 }
 
 // GetItemsFromPage can get product from html document by selectors in the configuration
-func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page, company crawler.Company, patternForCutPrice *regexp.Regexp) error {
+func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page, company crawler.Company) error {
 	document.Find(pageConfig.ItemSelector).Each(func(iterator int, item *goquery.Selection) {
 		var name, price string
 
@@ -43,12 +41,9 @@ func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page,
 		name = strings.TrimSpace(name)
 		price = strings.TrimSpace(price)
 
-		// price = strings.Replace(price, "р.", "", -1)
-		price = patternForCutPrice.ReplaceAllString(price, "")
-
 		//fmt.Printf("Review %s: %s \n", name, price)
 
-		cityName, err := cities.SearchCityByCode(pageConfig.CityParam)
+		cityName, err := cities.SearchCityByCode(pageConfig.CityID)
 		if err != nil {
 			log.Println(err)
 		}
@@ -71,30 +66,50 @@ func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page,
 	return nil
 }
 
+func (cw *Crawler) GetDocumentForUrl(iri string, pageConfig Page) (*goquery.Document, error) {
+	cookie, _ := cookiejar.New(nil)
+	city := &http.Cookie{Name: pageConfig.CityInCookieKey, Value: pageConfig.CityID}
+	allCookies := []*http.Cookie{}
+	allCookies = append(allCookies, city)
+
+	pageUrl, _ := url.Parse(iri)
+	cookie.SetCookies(pageUrl, allCookies)
+	client := &http.Client{
+		Jar: cookie,
+	}
+
+	request, _ := http.NewRequest("GET", iri, nil)
+	response, _ := client.Do(request)
+
+	document, err := goquery.NewDocumentFromResponse(response)
+	if err != nil {
+		return nil, err
+	}
+
+	return document, nil
+}
+
 // RunWithConfiguration can parse web documents and make Item structure for each product on page filtered by selectors
 func (cw *Crawler) RunWithConfiguration(config EntityConfig) error {
 
 	for _, pageConfig := range config.Pages {
 
-		//iri := config.Company.Iri + pageConfig.Path + pageConfig.PageParamPath + "1" + pageConfig.CityParamPath + pageConfig.CityParam
-		iri := "https://www.ulmart.ru/catalog/communicators?sort=5&viewType=2&rec=true"
+		iri := config.Company.Iri + pageConfig.Path
 
-		cookie, err := cookiejar.New(nil)
-		city:= &http.Cookie{Name:"city", Value: "1688"}
-		allCookies := []*http.Cookie{}
-		allCookies = append(allCookies, city)
-
-		pageUrl, _:=url.Parse(iri)
-		cookie.SetCookies(pageUrl, allCookies)
-
-		client := &http.Client{Jar:cookie}
-		response, err := client.Get(iri)
-
-		document, err := goquery.NewDocumentFromResponse(response)
+		document, err := cw.GetDocumentForUrl(iri, pageConfig)
 		if err != nil {
 			return err
 		}
-		fmt.Println(document)
+
+		totalPerPageItems, err := strconv.Atoi(document.Find(pageConfig.TotalCountItemsOnPageSelector).Text())
+		if err != nil {
+			return err
+		}
+
+		maxItems, err := strconv.Atoi(document.Find(pageConfig.TotalCountItemsOnPageSelector).Text())
+		if err != nil {
+			return err
+		}
 
 		//go cw.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
 
@@ -105,25 +120,30 @@ func (cw *Crawler) RunWithConfiguration(config EntityConfig) error {
 		//	return err
 		//}
 
-		countOfPages := 0
+		countOfPages := maxItems / totalPerPageItems
+
+		if maxItems%totalPerPageItems != 0 {
+			countOfPages += 1
+		}
 
 		pagesCrawling := make(chan func(), 6)
 
-		//go func() {
-		//	for crawler := range pagesCrawling {
-		//		go crawler()
-		//	}
-		//}()
+		go func() {
+			for someCrawler := range pagesCrawling {
+				go someCrawler()
+			}
+		}()
 
 		var iterator int
-		for iterator = 2; iterator <= countOfPages; iterator++ {
-			document, err := goquery.NewDocument(config.Company.Iri + pageConfig.Path + pageConfig.PageParamPath + strconv.Itoa(iterator) + pageConfig.CityParamPath + pageConfig.CityParam)
+		for iterator = 1; iterator <= countOfPages; iterator++ {
+			iri := config.Company.Iri + pageConfig.PagePath + pageConfig.PageParamPath + strconv.Itoa(iterator)
+			document, err := cw.GetDocumentForUrl(iri, pageConfig)
 			if err != nil {
 				return err
 			}
 
 			pagesCrawling <- func() {
-				cw.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
+				cw.GetItemsFromPage(document, pageConfig, config.Company)
 			}
 		}
 

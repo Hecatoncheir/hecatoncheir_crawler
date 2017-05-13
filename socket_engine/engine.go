@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/gorilla/websocket"
+	"hecatoncheir_/crawler/ulmart"
 )
 
 // MessageEvent  is a struct of event for receive from socket server
@@ -75,6 +76,7 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 	for event := range client.Channel {
+		fmt.Println(event)
 		switch event.Message {
 		case "Need api version":
 
@@ -103,6 +105,25 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 				var configuration = mvideo.EntityConfig{}
 				json.Unmarshal(dataBytes, &configuration)
+
+				go hecatonhair.RunWithConfiguration(configuration)
+			}
+
+			if company.Iri == "https://www.ulmart.ru/" {
+				hecatonhair := ulmart.NewCrawler()
+
+				go func() {
+					for item := range hecatonhair.Items {
+						data := map[string]interface{}{"Item": item}
+
+						engine.WriteAll("Item from categories of company parsed", data)
+					}
+				}()
+
+				var configuration = ulmart.EntityConfig{}
+				json.Unmarshal(dataBytes, &configuration)
+
+				fmt.Println(configuration)
 
 				go hecatonhair.RunWithConfiguration(configuration)
 			}

@@ -1,4 +1,4 @@
-package mvideo
+package ulmart
 
 import "hecatoncheir/crawler"
 
@@ -11,7 +11,7 @@ type ItemConfig struct {
 type Page struct {
 	ItemConfig
 	CityInCookieKey               string
-	CityKey                       string
+	CityID                        string
 	Path                          string
 	TotalCountItemsOnPageSelector string
 	MaxItemsOnPageSelector        string

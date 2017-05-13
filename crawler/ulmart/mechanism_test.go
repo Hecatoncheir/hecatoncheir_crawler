@@ -1,4 +1,4 @@
-package mvideo
+package ulmart
 
 import (
 	"hecatoncheir/crawler"
@@ -43,23 +43,25 @@ func TestCookies(test *testing.T) {
 	}
 }
 
-func TestCrawlerCanGetDocymentByConfig(test *testing.T) {
+func TestCrawlerCanGetDocumentByConfig(test *testing.T) {
 	smartphonesPage := Page{
 		Path:                          "catalog/communicators",
 		TotalCountItemsOnPageSelector: "#total-show-count",
 		MaxItemsOnPageSelector:        "#max-show-count",
 		PagePath:                      "catalogAdditional/communicators",
 		PageParamPath:                 "?pageNum=",
+		CityInCookieKey:               "city",
+		CityID:                        "18414",
 		ItemConfig: ItemConfig{
 			ItemSelector:        ".b-product",
 			NameOfItemSelector:  ".b-product__title a",
-			PriceOfItemSelector: ".b-product__price .b-price",
+			PriceOfItemSelector: ".b-product__price .b-price__num",
 		},
 	}
 
 	configuration := EntityConfig{
 		Company: crawler.Company{
-			Iri:        "https://www.ulmart.ru",
+			Iri:        "https://www.ulmart.ru/",
 			Name:       "Ulmart",
 			Categories: []string{"Телефоны"},
 		},

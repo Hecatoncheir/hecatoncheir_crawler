@@ -3,6 +3,7 @@ package main
 import (
 	"hecatoncheir/crawler"
 	"hecatoncheir/crawler/mvideo"
+	"hecatoncheir_/crawler/ulmart"
 	socket "hecatoncheir/socket_engine"
 	"sync"
 	"testing"
@@ -40,7 +41,7 @@ func SetUpSocketServer() {
 // 			}]
 // 	}
 // }
-func TestSocketCanParseDocumentOfEntity(test *testing.T) {
+func TestSocketCanParseDocumentOfMvideo(test *testing.T) {
 	goroutines.Add(1)
 	go once.Do(SetUpSocketServer)
 	goroutines.Wait()
@@ -52,7 +53,7 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 	}
 
 	smartphonesPage := mvideo.Page{
-		Path: "smartfony-i-svyaz/smartfony-205",
+		Path:                     "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",
 		PageParamPath:            "/f/page=",
 		CityParamPath:            "?cityId=",
@@ -91,10 +92,89 @@ func TestSocketCanParseDocumentOfEntity(test *testing.T) {
 
 	for event := range message {
 		if event.Message != "Item from categories of company parsed" ||
-			event.Data.(map[string]interface{})["Item"] == nil {
+				event.Data.(map[string]interface{})["Item"] == nil {
 			test.Fail()
 		}
 		break
 	}
+}
 
+//{
+//	"Message": "Get items from categories of company",
+//	"Data": {
+//			"Iri": "https://www.ulmart.ru/",
+//		"Name": "Ulmart",
+//		"Categories": ["Телефоны"],
+//			"Pages": [{
+//      "Path":                          "catalog/communicators",
+//      "TotalCountItemsOnPageSelector": "#total-show-count",
+//      "MaxItemsOnPageSelector":        "#max-show-count",
+//      "PagePath":                      "catalogAdditional/communicators",
+//      "PageParamPath":                 "?pageNum=",
+//      "CityInCookieKey":               "city",
+//      "CityID":                        "18414",
+//				"ItemSelector": ".b-product",
+//				"NameOfItemSelector": ".b-product__title a",
+//				"PriceOfItemSelector": ".b-product__price .b-price__num"
+//			}]
+//	}
+//}
+func TestSocketCanParseDocumentOfUlmart(test *testing.T) {
+	goroutines.Add(1)
+	go once.Do(SetUpSocketServer)
+	goroutines.Wait()
+
+	client, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
+
+	if err != nil {
+		test.Fatal()
+	}
+
+	smartphonesPage := ulmart.Page{
+		Path:                          "catalog/communicators",
+		TotalCountItemsOnPageSelector: "#total-show-count",
+		MaxItemsOnPageSelector:        "#max-show-count",
+		PagePath:                      "catalogAdditional/communicators",
+		PageParamPath:                 "?pageNum=",
+		CityInCookieKey:               "city",
+		CityID:                        "18414",
+		ItemConfig: ulmart.ItemConfig{
+			ItemSelector:        ".b-product",
+			NameOfItemSelector:  ".b-product__title a",
+			PriceOfItemSelector: ".b-product__price .b-price__num",
+		},
+	}
+
+	configuration := ulmart.EntityConfig{
+		Company: crawler.Company{
+			Iri:        "https://www.ulmart.ru/",
+			Name:       "Ulmart",
+			Categories: []string{"Телефоны"},
+		},
+		Pages: []ulmart.Page{smartphonesPage},
+	}
+
+	websocket.JSON.Send(client, socket.MessageEvent{Message: "Get items from categories of company", Data: configuration})
+
+	message := make(chan socket.MessageEvent)
+
+	go func() {
+		for {
+			socketEvent := socket.MessageEvent{}
+			err := websocket.JSON.Receive(client, &socketEvent)
+			if err != nil {
+				test.Error(err)
+			}
+			message <- socketEvent
+			break
+		}
+	}()
+
+	for event := range message {
+		if event.Message != "Item from categories of company parsed" ||
+				event.Data.(map[string]interface{})["Item"] == nil {
+			test.Fail()
+		}
+		break
+	}
 }
