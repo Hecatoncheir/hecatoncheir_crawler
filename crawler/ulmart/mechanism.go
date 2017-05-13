@@ -6,12 +6,11 @@ import (
 	"strings"
 	"time"
 	"net/http/cookiejar"
-
-	"hecatoncheir/crawler"
-
-	"github.com/PuerkitoBio/goquery"
 	"net/http"
 	"net/url"
+
+	"hecatoncheir/crawler"
+	"github.com/PuerkitoBio/goquery"
 )
 
 var cities = crawler.Cities{
@@ -106,19 +105,10 @@ func (cw *Crawler) RunWithConfiguration(config EntityConfig) error {
 			return err
 		}
 
-		maxItems, err := strconv.Atoi(document.Find(pageConfig.TotalCountItemsOnPageSelector).Text())
+		maxItems, err := strconv.Atoi(document.Find(pageConfig.MaxItemsOnPageSelector).Text())
 		if err != nil {
 			return err
 		}
-
-		//go cw.GetItemsFromPage(document, pageConfig, config.Company, patternForCutPrice)
-
-		//pagesCount := document.Find(pageConfig.PageInPaginationSelector).Last().Find("a").Text()
-
-		//countOfPages, err := strconv.Atoi(pagesCount)
-		//if err != nil {
-		//	return err
-		//}
 
 		countOfPages := maxItems / totalPerPageItems
 

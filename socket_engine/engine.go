@@ -3,14 +3,15 @@ package socket_engine
 import (
 	"encoding/json"
 	"fmt"
-	"hecatoncheir/crawler"
-	"hecatoncheir/crawler/mvideo"
 	"log"
 	"net/http"
 	"sync"
 
 	"github.com/gorilla/websocket"
-	"hecatoncheir_/crawler/ulmart"
+
+	"hecatoncheir/crawler"
+	"hecatoncheir/crawler/mvideo"
+	"hecatoncheir/crawler/ulmart"
 )
 
 // MessageEvent  is a struct of event for receive from socket server
@@ -76,7 +77,6 @@ func (engine *Engine) AddConnectedClient(response http.ResponseWriter, request *
 func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 	for event := range client.Channel {
-		fmt.Println(event)
 		switch event.Message {
 		case "Need api version":
 
@@ -122,8 +122,6 @@ func (engine *Engine) listenConnectedClient(client *ConnectedClient) {
 
 				var configuration = ulmart.EntityConfig{}
 				json.Unmarshal(dataBytes, &configuration)
-
-				fmt.Println(configuration)
 
 				go hecatonhair.RunWithConfiguration(configuration)
 			}

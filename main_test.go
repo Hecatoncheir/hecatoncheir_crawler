@@ -3,7 +3,7 @@ package main
 import (
 	"hecatoncheir/crawler"
 	"hecatoncheir/crawler/mvideo"
-	"hecatoncheir_/crawler/ulmart"
+	"hecatoncheir/crawler/ulmart"
 	socket "hecatoncheir/socket_engine"
 	"sync"
 	"testing"
@@ -120,10 +120,6 @@ func TestSocketCanParseDocumentOfMvideo(test *testing.T) {
 //	}
 //}
 func TestSocketCanParseDocumentOfUlmart(test *testing.T) {
-	goroutines.Add(1)
-	go once.Do(SetUpSocketServer)
-	goroutines.Wait()
-
 	client, err := websocket.Dial("ws://localhost:8181", "", "http://localhost:8181")
 
 	if err != nil {
