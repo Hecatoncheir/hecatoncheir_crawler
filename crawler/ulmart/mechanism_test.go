@@ -2,12 +2,12 @@ package ulmart
 
 import (
 	"hecatoncheir/crawler"
-	"testing"
-	"time"
-	"net/url"
-	"strings"
 	"net/http"
 	"net/http/cookiejar"
+	"net/url"
+	"strings"
+	"testing"
+	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
@@ -47,7 +47,7 @@ func TestCookies(test *testing.T) {
 
 func TestCrawlerCanGetDocumentByConfig(test *testing.T) {
 	smartphonesPage := Page{
-		Path:                          "catalog/communicators",
+		Path: "catalog/communicators",
 		TotalCountItemsOnPageSelector: "#total-show-count",
 		MaxItemsOnPageSelector:        "#max-show-count",
 		PagePath:                      "catalogAdditional/communicators",

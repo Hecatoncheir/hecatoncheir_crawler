@@ -53,7 +53,7 @@ func TestSocketCanParseDocumentOfMvideo(test *testing.T) {
 	}
 
 	smartphonesPage := mvideo.Page{
-		Path:                     "smartfony-i-svyaz/smartfony-205",
+		Path: "smartfony-i-svyaz/smartfony-205",
 		PageInPaginationSelector: ".pagination-list .pagination-item",
 		PageParamPath:            "/f/page=",
 		CityParamPath:            "?cityId=",
@@ -92,7 +92,7 @@ func TestSocketCanParseDocumentOfMvideo(test *testing.T) {
 
 	for event := range message {
 		if event.Message != "Item from categories of company parsed" ||
-				event.Data.(map[string]interface{})["Item"] == nil {
+			event.Data.(map[string]interface{})["Item"] == nil {
 			test.Fail()
 		}
 		break
@@ -127,7 +127,7 @@ func TestSocketCanParseDocumentOfUlmart(test *testing.T) {
 	}
 
 	smartphonesPage := ulmart.Page{
-		Path:                          "catalog/communicators",
+		Path: "catalog/communicators",
 		TotalCountItemsOnPageSelector: "#total-show-count",
 		MaxItemsOnPageSelector:        "#max-show-count",
 		PagePath:                      "catalogAdditional/communicators",
@@ -168,7 +168,7 @@ func TestSocketCanParseDocumentOfUlmart(test *testing.T) {
 
 	for event := range message {
 		if event.Message != "Item from categories of company parsed" ||
-				event.Data.(map[string]interface{})["Item"] == nil {
+			event.Data.(map[string]interface{})["Item"] == nil {
 			test.Fail()
 		}
 		break

@@ -2,15 +2,15 @@ package ulmart
 
 import (
 	"log"
+	"net/http"
+	"net/http/cookiejar"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
-	"net/http/cookiejar"
-	"net/http"
-	"net/url"
 
-	"hecatoncheir/crawler"
 	"github.com/PuerkitoBio/goquery"
+	"hecatoncheir/crawler"
 )
 
 var cities = crawler.Cities{
