@@ -4,11 +4,13 @@ import (
 	"hecatoncheir/crawler"
 	"testing"
 	"time"
-	"net/http"
-	"net/http/cookiejar"
-	"github.com/PuerkitoBio/goquery"
 	"net/url"
 	"strings"
+	"net/http"
+	"net/http/cookiejar"
+
+	"github.com/PuerkitoBio/goquery"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCookies(test *testing.T) {
@@ -80,6 +82,7 @@ func TestCrawlerCanGetDocumentByConfig(test *testing.T) {
 	}()
 
 	for item := range mechanism.Items {
+		assert.Equal(test, item.Price.City, "Москва", "Not right city")
 		if item.Name != "" && item.Price.Value != "" {
 			isRightItems = true
 			break
