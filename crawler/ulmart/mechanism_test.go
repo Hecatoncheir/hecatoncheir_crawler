@@ -45,20 +45,22 @@ func TestCookies(test *testing.T) {
 
 func TestCrawlerCanGetDocymentByConfig(test *testing.T) {
 	smartphonesPage := Page{
-		Path:                     "smartfony-i-svyaz/smartfony-205",
-		PageInPaginationSelector: ".pagination-list .pagination-item",
-		PageParamPath:            "/f/page=",
+		Path:                          "catalog/communicators",
+		TotalCountItemsOnPageSelector: "#total-show-count",
+		MaxItemsOnPageSelector:        "#max-show-count",
+		PagePath:                      "catalogAdditional/communicators",
+		PageParamPath:                 "?pageNum=",
 		ItemConfig: ItemConfig{
-			ItemSelector:        ".grid-view .product-tile",
-			NameOfItemSelector:  ".product-tile-title",
-			PriceOfItemSelector: ".product-price-current",
+			ItemSelector:        ".b-product",
+			NameOfItemSelector:  ".b-product__title a",
+			PriceOfItemSelector: ".b-product__price .b-price",
 		},
 	}
 
 	configuration := EntityConfig{
 		Company: crawler.Company{
-			Iri:        "http://www.mvideo.ru/",
-			Name:       "M.Video",
+			Iri:        "https://www.ulmart.ru",
+			Name:       "Ulmart",
 			Categories: []string{"Телефоны"},
 		},
 		Pages: []Page{smartphonesPage},

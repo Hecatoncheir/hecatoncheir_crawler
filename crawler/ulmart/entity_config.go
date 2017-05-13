@@ -10,11 +10,13 @@ type ItemConfig struct {
 
 type Page struct {
 	ItemConfig
-	CityParamPath            string
-	CityParam                string
-	Path                     string
-	PageInPaginationSelector string
-	PageParamPath            string
+	CityInCookieKey               string
+	CityKey                       string
+	Path                          string
+	TotalCountItemsOnPageSelector string
+	MaxItemsOnPageSelector        string
+	PagePath                      string
+	PageParamPath                 string
 }
 
 type EntityConfig struct {

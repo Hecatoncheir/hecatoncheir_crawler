@@ -73,7 +73,6 @@ func (cw *Crawler) GetItemsFromPage(document *goquery.Document, pageConfig Page,
 
 // RunWithConfiguration can parse web documents and make Item structure for each product on page filtered by selectors
 func (cw *Crawler) RunWithConfiguration(config EntityConfig) error {
-	patternForCutPrice, _ := regexp.Compile("р[уб]*?.")
 
 	for _, pageConfig := range config.Pages {
 
